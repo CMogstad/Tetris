@@ -3,10 +3,13 @@ import java.awt.*;
 
 public class GameFrame extends JFrame {
 
-    public GameFrame() {
+    public GameFrame(GameLogic gameLogic) {
         this.setLayout(new BorderLayout());
-        this.add(new GamePanel(), BorderLayout.WEST);
-        this.add(new MenuPanel(), BorderLayout.EAST);
+
+        MenuPanel menuPanel = new MenuPanel(gameLogic);
+        GamePanel gamePanel = new GamePanel(menuPanel, gameLogic);
+        this.add(menuPanel, BorderLayout.EAST);
+        this.add(gamePanel, BorderLayout.WEST);
 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.pack();
@@ -14,5 +17,4 @@ public class GameFrame extends JFrame {
         this.setResizable(false);
         this.setVisible(true);
     }
-
 }

@@ -1,6 +1,7 @@
 public class Main {
 
     public static void main(String[] args) {
-        new GameFrame();
+        GameLogic gameLogic= new GameLogic();
+        new GameFrame(gameLogic);
     }
 }
