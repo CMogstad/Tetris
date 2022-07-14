@@ -5,50 +5,62 @@ import java.util.ArrayList;
 
 public class GamePanel extends JPanel implements ActionListener {
 
-    final int WIDTH = 240;
-    final int HEIGHT = 500;
-    final int UNIT_SIZE = 20;
+    final private int WIDTH = 240;
+    final private int HEIGHT = 500;
+    final private int UNIT_SIZE = 20;
 
-    MyKeyListener myKeyListener = new MyKeyListener();
-    Timer timerGame;
-    Block movingBlock;
-    Block nextBlock;
-    int delay = 0;
+    private MyKeyListener myKeyListener = new MyKeyListener();
+    private MenuPanel menuPanel;
+    private GameLogic gameLogic;
+    private Timer timerGame;
+    private int delay = 0;
 
-    MenuPanel menuPanel;
-    ArrayList<Block> blocks = new ArrayList<>();
-    GameLogic gameLogic;
+    private Block movingBlock;
+    private Block nextBlock;
+    private  ArrayList<Block> fixedBlocks = new ArrayList<>();
 
     public GamePanel(MenuPanel menuPanel, GameLogic gameLogic) {
         this.gameLogic = gameLogic;
+        this.menuPanel = menuPanel;
+        setupPanel();
+        timerGame = new Timer(delay, this);
+
+        startGame();
+    }
+
+    private void setupPanel() {
         this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         this.setBackground(Color.black);
         this.setFocusable(true);
         this.addKeyListener(myKeyListener);
-
-        this.menuPanel = menuPanel;
-
-        startGame();
     }
 
+    // --- GAME (LIFE) CYCLE --------------------------------------------------
+
     public void startGame() {
-        initiateBlocks(); //TODO: KEEP CODE LIKE THIS??
+        initiateBlocks();
         gameLogic.runGame(true);
-        timerGame = new Timer(delay, this);
         timerGame.start();
     }
 
+    public void gameOver() {
+        gameLogic.runGame(false);
+        timerGame.stop();
+    }
+
     public void restartGame() {
-        blocks.clear();
+        fixedBlocks.clear();
         startGame();
     }
+
+    // --- DRAW -------------------------------------------------------------------------
 
     public void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
         draw(graphics);
     }
 
-    public void draw(Graphics graphics) {
+    private void draw(Graphics graphics) {
         for (int i = 0; i < HEIGHT / UNIT_SIZE; i++) {
             graphics.drawLine(i * UNIT_SIZE, 0, i * UNIT_SIZE, HEIGHT);
             graphics.drawLine(0, i * UNIT_SIZE, WIDTH, i * UNIT_SIZE);
@@ -74,7 +86,7 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     private void drawExistingBlocks(Graphics graphics) {
-        for (Block block : blocks) {
+        for (Block block : fixedBlocks) {
             graphics.setColor(block.getShape().getColor());
             for (Unit unit : block.getUnits()) {
                 graphics.fillRect(unit.getX(), unit.getY(), UNIT_SIZE, UNIT_SIZE);
@@ -82,7 +94,7 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
-    public void drawMovingBlock(Graphics graphics) {
+    private void drawMovingBlock(Graphics graphics) {
         graphics.setColor(movingBlock.getShape().getColor());
 
         for (Unit unit : movingBlock.getUnits()) {
@@ -90,13 +102,22 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
-    public void checkRow() {
+    // --- VERIFICATIONS ---------------------------------------------------------------
+
+    private void verifyFullRows(){
+        ArrayList<Integer> fullRows = getYCoordinatesForFullRows();
+        if (fullRows.size() > 0) {
+            manageFullRow(fullRows);
+        }
+    }
+
+    private ArrayList<Integer> getYCoordinatesForFullRows() {
         ArrayList<Integer> yCoordinates = new ArrayList<>();
 
         for (int y = 0; y < HEIGHT; y++) { //For each row
             ArrayList<Unit> unitsOneRow = new ArrayList<>();
 
-            for (Block block : blocks) { //For each block
+            for (Block block : fixedBlocks) { //For each block
                 for (Unit unit : block.getUnits()) { //For each unit
                     if (unit.getY() == y) {
                         unitsOneRow.add(unit);
@@ -104,47 +125,133 @@ public class GamePanel extends JPanel implements ActionListener {
                 }
             }
 
-            if (unitsOneRow.size() == WIDTH / UNIT_SIZE) {
+            if (unitsOneRow.size() == WIDTH / UNIT_SIZE) { //If row is full, save y-coordinate
                 yCoordinates.add(y);
             }
         }
 
-        if (yCoordinates.size() > 0) {
-            removeRow(yCoordinates);
-            removeBlocksWithNoUnits();
-            moveEverythingOneRowDown(yCoordinates);
-            increaseScore(yCoordinates.size());
-        }
-
+        return yCoordinates;
     }
+
+    private boolean isColumnFull() {
+        for (Block block : fixedBlocks) {
+            if (block.getY() == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isMovingBlockTouchingLeftWall() {
+        for (Unit unit : movingBlock.getMostLeftUnits()) {
+            if (unit.getX() <= 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isMovingBlockTouchingRightWall() {
+        for (Unit unit : movingBlock.getMostRightUnits()) {
+            if (unit.getX() + UNIT_SIZE >= WIDTH) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isRightBlockedByFixedBlocks() {
+        for (Block fixedBlock : fixedBlocks) {
+            for (Unit fixedUnit : fixedBlock.getMostLeftUnits()) {
+                for (Unit movingUnit : movingBlock.getMostRightUnits()) {
+                    if (movingUnit.getX() + UNIT_SIZE == fixedUnit.getX()) {
+                        if (movingUnit.getY() == fixedUnit.getY()) {
+                            return true;
+                        }
+
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isLeftBlockedByFixedBlocks() {
+        for (Block fixedBlock : fixedBlocks) {
+            for (Unit fixedUnit : fixedBlock.getMostRightUnits()) {
+                for (Unit movingUnit : movingBlock.getMostLeftUnits()) {
+                    if (movingUnit.getX() == fixedUnit.getX() + UNIT_SIZE) {
+                        if (movingUnit.getY() == fixedUnit.getY()) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hasMovingBlockLandedOnBlocks() {
+        if (fixedBlocks.size() > 0) {
+            for (Block block : fixedBlocks) {
+                for (Unit unit : block.getUnits()) {
+                    for (Unit movingUnit : movingBlock.getLowestUnits()) {
+                        if (((movingUnit.getY() + UNIT_SIZE == unit.getY()) && (movingUnit.getX() == unit.getX()))) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean hasMovingBlockReachedBottom() {
+        for (Unit unit : movingBlock.getLowestUnits()) {
+            if ((unit.getY() + UNIT_SIZE) == HEIGHT) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isRotationPossible() {
+        ArrayList<Unit> predictedUnits = movingBlock.predictRotation();
+
+        for (Block block : fixedBlocks) {
+            for (Unit fixedUnit : block.getUnits()) {
+                for (Unit movingUnit : predictedUnits) {
+                    if (fixedUnit.getX() == movingUnit.getX() && fixedUnit.getY() == movingUnit.getY()) {
+                        return false;
+                    }
+                }
+
+            }
+        }
+        return true;
+    }
+
+    // --- MANAGE BLOCKS -------------------------------------------------------------
 
     private void removeBlocksWithNoUnits() {
-        for (int i = blocks.size() - 1; i >= 0; i--) {
-            Block block = blocks.get(i);
+        for (int i = fixedBlocks.size() - 1; i >= 0; i--) {
+            Block block = fixedBlocks.get(i);
             if (block.getUnits().isEmpty()) {
-                blocks.remove(block);
+                fixedBlocks.remove(block);
             }
         }
     }
 
-    public void checkColumn() {
-        for (Block block : blocks) {
-            if (block.getY() == 0) {
-                gameOver();
-            }
-        }
-    }
-
-    public void removeRow(ArrayList<Integer> yCooridnates) {
+    public void removeRow(ArrayList<Integer> yCoordinates) {
         ArrayList<Integer> xCoordinates = new ArrayList<>();
 
-        for (int y : yCooridnates) {
+        for (int y : yCoordinates) {
             for (int i = 0; i < WIDTH / UNIT_SIZE; i++) {
                 int x = i * UNIT_SIZE;
                 xCoordinates.add(x);
             }
 
-            for (Block block : blocks) {
+            for (Block block : fixedBlocks) {
                 for (int x : xCoordinates) {
                     block.removeUnit(x, y);
                 }
@@ -152,43 +259,120 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
-    private void increaseScore(int rows) {
-        gameLogic.increaseScore(rows);
-        menuPanel.displayScore();
-    }
-
     public void moveEverythingOneRowDown(ArrayList<Integer> yCoordinates) {
         for (int y : yCoordinates) {
-            for (Block block : blocks) {
+            for (Block block : fixedBlocks) {
                 block.moveBlockOneRowDown(y);
             }
         }
     }
 
+    public void moveBlockLeft() {
+        if (!isMovingBlockTouchingLeftWall() && !isLeftBlockedByFixedBlocks()) {
+            movingBlock.moveLeft();
+        }
+    }
+
+    public void moveBlockRight() {
+        if (!isMovingBlockTouchingRightWall() && !isRightBlockedByFixedBlocks()) {
+            movingBlock.moveRight();
+        }
+    }
+
+    public void moveBlockDown() {
+        float fallingDelay = 0.2f;
+        timeUntilFallingMovement = timeUntilFallingMovement - fallingDelay;
+    }
+
+    public void rotateBlock() {
+        if (isRotationPossible()) {
+            movingBlock.rotate();
+        }
+    }
+
+    public void landBlock() {
+        fixedBlocks.add(movingBlock);
+        verifyFullRows();
+
+        if (isColumnFull()) {
+            gameOver();
+        } else {
+            spawnNewBlock();
+        }
+    }
+
+    public void initiateBlocks() {
+        createMovingBlock();
+        createNextBlock();
+    }
+
+    public void createNextBlock() {
+        nextBlock = new Block(HEIGHT, WIDTH, UNIT_SIZE);
+        menuPanel.setNextBlock(nextBlock);
+    }
+
+    public void createMovingBlock() {
+        movingBlock = new Block(HEIGHT, WIDTH, UNIT_SIZE);
+        movingBlock.setStartPosition();
+    }
+
+    public void spawnNewBlock() {
+        movingBlock = nextBlock;
+        movingBlock.setStartPosition();
+        createNextBlock();
+    }
+
+    public void manageFullRow(ArrayList<Integer> yCoordinates) {
+        removeRow(yCoordinates);
+        removeBlocksWithNoUnits();
+        moveEverythingOneRowDown(yCoordinates);
+        increaseScore(yCoordinates.size());
+    }
+
+    // --- SCORE -----------------------------------------------------------------------
+
+    private void increaseScore(int rows) {
+        gameLogic.increaseScore(rows);
+        menuPanel.displayScore();
+    }
+
+    // --- TICKS -----------------------------------------------------------------------
+
+    long prevWhen = 0;
+    float timeUntilFallingMovement = 0.0f;
+    float timeUntilInputMovement = 0.0f;
+    float timeUntilNextRotate = 0.0f;
+    float inputDelay = 0.1f;
+    float fallingDelay = 1f;
+    float rotationDelay = 0.3f;
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        long when = e.getWhen(); //when is this happening?
+        long deltaWhenMs = when - prevWhen; //How long has gone sine the last time this happened? (milliseconds)
+        float delay = 800f;
+        float deltaTime = deltaWhenMs / delay;
+
+        prevWhen = when; //Save the current when
+
+        if (gameLogic.isRunning() && !gameLogic.isPaused()) {
+            timeUntilFallingMovement = timeUntilFallingMovement - deltaTime;
+            timeUntilInputMovement = timeUntilInputMovement - deltaTime;
+            timeUntilNextRotate = timeUntilNextRotate - deltaTime;
+
+            tickInput();
+
+            if (timeUntilFallingMovement <= 0) {
+                tickFallingBlock();
+                timeUntilFallingMovement = fallingDelay;
+            }
+        }
+        repaint();
+    }
+
     public void tickFallingBlock() {
-        boolean stop = false;
-
-        for (Unit unit : movingBlock.getLowestUnits()) {
-            if ((unit.getY() + UNIT_SIZE) == HEIGHT) { //Has block reached bottom?
-                stop = true;
-            }
-        }
-
-        if (blocks.size() > 0) { //Has block touched other blocks?
-            for (Block block : blocks) {
-                for (Unit unit : block.getUnits()) {
-                    for (Unit movingUnit : movingBlock.getLowestUnits()) {
-                        if (((movingUnit.getY() + UNIT_SIZE == unit.getY()) && (movingUnit.getX() == unit.getX()))) {
-                            stop = true;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (stop) {
-            landingBlock();
+        if (hasMovingBlockLandedOnBlocks() || hasMovingBlockReachedBottom()) {
+            landBlock();
         } else {
             movingBlock.moveOneStepY();
         }
@@ -213,179 +397,6 @@ public class GamePanel extends JPanel implements ActionListener {
         if (myKeyListener.downPressed) {
             moveBlockDown();
         }
-    }
-
-    public void moveBlockLeft() {
-        boolean canMoveLeft = true;
-
-        canMoveLeft = !isMovingBlockNextToLeftWall();
-
-        for (Block block : blocks) {
-            if (isLeftBlocked(block)) {
-                canMoveLeft = false;
-                break;
-            }
-        }
-
-        if (canMoveLeft) {
-            movingBlock.moveLeft();
-        }
-    }
-
-    public boolean isMovingBlockNextToLeftWall() {
-        for (Unit unit : movingBlock.getMostLeftUnits()) {
-            if (unit.getX() <= 0) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean isMovingBlockNextToRightWall() {
-        for (Unit unit : movingBlock.getMostRightUnits()) {
-            if (unit.getX() + UNIT_SIZE >= WIDTH) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void moveBlockRight() {
-        boolean canMoveRight = true;
-
-        canMoveRight = !isMovingBlockNextToRightWall();
-
-        for (Block block : blocks) {
-            if (isRightBlocked(block)) {
-                canMoveRight = false;
-            }
-        }
-
-        if (canMoveRight) {
-            movingBlock.moveRight();
-        }
-    }
-
-    public boolean isRightBlocked(Block fixedBlock) {
-        for (Unit fixedUnit : fixedBlock.getMostLeftUnits()) {
-            for (Unit movingUnit : movingBlock.getMostRightUnits()) {
-                if (movingUnit.getX() + UNIT_SIZE == fixedUnit.getX()) {
-                    if (movingUnit.getY() == fixedUnit.getY()) {
-                        return true;
-                    }
-
-                }
-            }
-        }
-        return false;
-    }
-
-    public boolean isLeftBlocked(Block fixedBlock) {
-        for (Unit fixedUnit : fixedBlock.getMostRightUnits()) {
-            for (Unit movingUnit : movingBlock.getMostLeftUnits()) {
-                if (movingUnit.getX() == fixedUnit.getX() + UNIT_SIZE) {
-                    if (movingUnit.getY() == fixedUnit.getY()) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    public void moveBlockDown() {
-        timeUntilFallingMovement = timeUntilFallingMovement - 0.2f;
-    }
-
-    public void rotateBlock() {
-        boolean rotationAllowed = true;
-        ArrayList<Unit> predictedUnits = movingBlock.predictRotation();
-
-        //Predict rotation
-        for (Block block : blocks) {
-            for (Unit fixedUnit : block.getUnits()) {
-                for (Unit movingUnit : predictedUnits) {
-                    if (fixedUnit.getX() == movingUnit.getX() && fixedUnit.getY() == movingUnit.getY()) {
-                        rotationAllowed = false;
-                        break;
-                    }
-                }
-                if (!rotationAllowed) { //TODO: MAKE THIS CODE LESS AWKWARD
-                    break;
-                }
-            }
-            if (!rotationAllowed) {
-                break;
-            }
-        }
-
-        if (rotationAllowed) {
-            movingBlock.rotate();
-        }
-    }
-
-    public void landingBlock() {
-        blocks.add(movingBlock);
-        checkRow();
-        checkColumn();
-        spawnBlock();
-    }
-
-    public void initiateBlocks() {
-        createMovingBlock();
-        createNextBlock();
-    }
-
-    public void createNextBlock() {
-        nextBlock = new Block(HEIGHT, WIDTH, UNIT_SIZE);
-        menuPanel.setNextBlock(nextBlock);
-    }
-
-    public void createMovingBlock() {
-        movingBlock = new Block(HEIGHT, WIDTH, UNIT_SIZE);
-        movingBlock.setStartPosition();
-    }
-
-    public void spawnBlock() {
-        movingBlock = nextBlock;
-        movingBlock.setStartPosition();
-        createNextBlock();
-    }
-
-    public void gameOver() {
-        gameLogic.runGame(false);
-        timerGame.stop();
-    }
-
-    long prevWhen = 0;
-    float timeUntilFallingMovement = 0.0f;
-    float timeUntilInputMovement = 0.0f;
-    float timeUntilNextRotate = 0.0f;
-    float inputDelay = 0.1f;
-    float fallingDelay = 1f;
-    float rotationDelay = 0.3f;
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        long when = e.getWhen(); //when is this happening?
-        long deltaWhenMs = when - prevWhen; //How long has gone sine the last time this happened? (milliseconds)
-        float deltaTime = deltaWhenMs / 800f;
-
-        prevWhen = when; //Save the current when
-
-        if (gameLogic.isRunning() && !gameLogic.isPaused()) {
-            timeUntilFallingMovement = timeUntilFallingMovement - deltaTime;
-            timeUntilInputMovement = timeUntilInputMovement - deltaTime;
-            timeUntilNextRotate = timeUntilNextRotate - deltaTime;
-
-            tickInput();
-
-            if (timeUntilFallingMovement <= 0) {
-                tickFallingBlock();
-                timeUntilFallingMovement = fallingDelay;
-            }
-        }
-        repaint();
     }
 
     private class MyKeyListener implements KeyListener {
