@@ -2,25 +2,29 @@ import java.util.ArrayList;
 
 public class GameLogic {
 
-    private boolean running = false;
-    private boolean paused = false;
-    private int score = 0;
-
     private int panelWidth;
     private int panelHeight;
     private int unitSize;
 
-    public void increaseScore(int rows) {
-        score += 100 * (rows + (rows - 1));
-    }
+    private boolean running = false;
+    private boolean paused = false;
+    private int score = 0;
 
-    public void runGame(boolean running) {
-        this.running = running;
-    }
+    private Block movingBlock;
+    private Block nextBlock;
+    private ArrayList<Block> fixedBlocks = new ArrayList<>();
 
-    public void pauseGame(boolean paused) {
-        this.paused = paused;
-    }
+    float timeUntilFallingMovement = 0.0f;
+    float timeUntilInputMovement = 0.0f;
+    float timeUntilNextRotate = 0.0f;
+    float inputDelay = 0.1f;
+    float regularFallingDelay = 1f;
+    float adjustedFallingDelay = 0.2f;
+    float rotationDelay = 0.3f;
+
+    boolean updateOfScoreDisplayNeeded = false;
+
+    // --- GETTERS ------------------------------------------------------
 
     public boolean isRunning() {
         return running;
@@ -32,6 +36,29 @@ public class GameLogic {
 
     public int getScore() {
         return score;
+    }
+
+    public Block getMovingBlock() {
+        return movingBlock;
+    }
+
+    public Block getNextBlock() {
+        return nextBlock;
+    }
+
+    public ArrayList<Block> getFixedBlocks() {
+        return fixedBlocks;
+    }
+
+
+    // --- SETTERS ---------------------------------------------------------
+
+    public void runGame(boolean running) {
+        this.running = running;
+    }
+
+    public void pauseGame(boolean paused) {
+        this.paused = paused;
     }
 
     public void setPanelWidth(int panelWidth) {
@@ -46,23 +73,13 @@ public class GameLogic {
         this.unitSize = unitSize;
     }
 
-    //---------------------------------------
 
-    private Block movingBlock;
-    private Block nextBlock;
-    private ArrayList<Block> fixedBlocks = new ArrayList<>();
+    // --- FUNCTIONALITY ------------------------------------------------------------
 
-    public Block getMovingBlock() {
-        return movingBlock;
+    public void increaseScore(int rows) {
+        score += 100 * (rows + (rows - 1));
     }
 
-    public Block getNextBlock() {
-        return nextBlock;
-    }
-
-    public ArrayList<Block> getFixedBlocks() {
-        return fixedBlocks;
-    }
 
     // --- VERIFICATIONS ---------------------------------------------------------------
 
@@ -70,6 +87,9 @@ public class GameLogic {
         ArrayList<Integer> fullRows = getYCoordinatesForFullRows();
         if (fullRows.size() > 0) {
             manageFullRow(fullRows);
+            updateOfScoreDisplayNeeded = true;
+        } else {
+            updateOfScoreDisplayNeeded = false;
         }
     }
 
@@ -241,9 +261,9 @@ public class GameLogic {
         }
     }
 
-    public void moveBlockDown() { //TODO
-        float fallingDelay = 0.2f;
-        timeUntilFallingMovement = timeUntilFallingMovement - fallingDelay;
+    public void moveBlockDown() {
+        //adjustedFallingDelay = 0.2f;
+        timeUntilFallingMovement = timeUntilFallingMovement - adjustedFallingDelay;
     }
 
     public void rotateBlock() {
@@ -270,7 +290,6 @@ public class GameLogic {
 
     public void createNextBlock() {
         nextBlock = new Block(panelHeight, panelWidth, unitSize);
-        //menuPanel.setNextBlock(nextBlock); TODO
     }
 
     public void createMovingBlock() {
@@ -291,21 +310,11 @@ public class GameLogic {
         increaseScore(yCoordinates.size());
     }
 
-    // --- SCORE -----------------------------------------------------------------------
+    //--- TICKS ---------------------------------------------------------------------------
 
-    /*public void increaseScore(int rows) {
-        increaseScore(rows);
-        menuPanel.displayScore(); TODO
-    }*/
-
-    //------------OTHER-----------------------------------------------------------------
-
-    float timeUntilFallingMovement = 0.0f;
-    float timeUntilInputMovement = 0.0f;
-    float timeUntilNextRotate = 0.0f;
-    float inputDelay = 0.1f;
-    float fallingDelay = 1f;
-    float rotationDelay = 0.3f;
+    public boolean isUpdateOfScoreDisplayNeeded() {
+        return updateOfScoreDisplayNeeded;
+    }
 
     public void tickFallingBlock(float deltaTime) {
         timeUntilFallingMovement = timeUntilFallingMovement - deltaTime;
@@ -317,7 +326,7 @@ public class GameLogic {
                 getMovingBlock().moveOneStepY();
             }
 
-            timeUntilFallingMovement = fallingDelay;
+            timeUntilFallingMovement = regularFallingDelay;
         }
     }
 
@@ -325,7 +334,7 @@ public class GameLogic {
         timeUntilInputMovement = timeUntilInputMovement - deltaTime;
         timeUntilNextRotate = timeUntilNextRotate - deltaTime;
 
-        if (isRunning()) {
+        if (running) {
             if (myKeyListener.leftPressed && timeUntilInputMovement <= 0) {
                 moveBlockLeft();
                 timeUntilInputMovement = inputDelay;
@@ -344,14 +353,16 @@ public class GameLogic {
             if (myKeyListener.downPressed) {
                 moveBlockDown();
             }
-        } else {
-            if (myKeyListener.spacePressed && !isRunning()) {
-                restartGame();
-            }
         }
     }
 
-    // --- GAME (LIFE) CYCLE -------------------------------------------------- HERE
+    public void pushButtonToRestart(MyKeyListener myKeyListener){
+        if (myKeyListener.spacePressed) {
+            restartGame();
+        }
+    }
+
+    // --- GAME (LIFE) CYCLE --------------------------------------------------
 
     public void startGame() {
         initiateBlocks();
@@ -360,12 +371,16 @@ public class GameLogic {
 
     public void gameOver() {
         runGame(false);
-        // timerGame.stop(); TODO
     }
 
     public void restartGame() {
+        resetScore();
         fixedBlocks.clear();
         startGame();
     }
 
+    private void resetScore() {
+        score = 0;
+        updateOfScoreDisplayNeeded = true;
+    }
 }

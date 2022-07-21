@@ -14,7 +14,6 @@ public class MenuPanel extends JPanel implements ActionListener {
     JLabel scoreLabel;
     JLabel scoreAmount;
     JLabel nextBlockLabel;
-    Block nextBlock;
     JButton pauseButton;
     SpringLayout springLayout = new SpringLayout();
     GameLogic gameLogic;
@@ -31,8 +30,25 @@ public class MenuPanel extends JPanel implements ActionListener {
         this.add(scoreAmount);
         this.add(nextBlockLabel);
         this.add(pauseButton);
-        this.setVisible(true);
     }
+
+    // --- DRAW ----------------------------------------------------------------------------------------------------
+
+    public void paintComponent(Graphics graphics) {
+        super.paintComponent(graphics);
+        drawNextBlock(graphics);
+    }
+
+    public void drawNextBlock(Graphics graphics) {
+        graphics.setColor(gameLogic.getNextBlock().getShape().getColor());
+
+        for (Unit unit : gameLogic.getNextBlock().getUnits()) {
+            graphics.fillRect(unit.getX() + UNIT_SIZE * 2, unit.getY() + 8 * UNIT_SIZE, UNIT_SIZE, UNIT_SIZE);
+        }
+        repaint();
+    }
+
+    // --- CREATE COMPONENTS ----------------------------------------------------------------------------------------------------
 
     private void createPauseButton() {
         pauseButton = new JButton("PAUSE");
@@ -80,31 +96,15 @@ public class MenuPanel extends JPanel implements ActionListener {
         springLayout.putConstraint(SpringLayout.HORIZONTAL_CENTER, scoreAmount, 0, SpringLayout.HORIZONTAL_CENTER, this);
     }
 
+    // --- FUNCTIONALITIES -------------------------------------------------------------------------
+
     public void displayScore() {
         scoreAmount.setText(gameLogic.getScore() + "");
     }
 
-    public void paintComponent(Graphics graphics) {
-        super.paintComponent(graphics);
-        drawNextBlock(graphics);
-    }
-
-    public void drawNextBlock(Graphics graphics) {
-        graphics.setColor(nextBlock.getShape().getColor());
-
-        for (Unit unit : nextBlock.getUnits()) {
-            graphics.fillRect(unit.getX() + UNIT_SIZE * 2, unit.getY() + 8 * UNIT_SIZE, UNIT_SIZE, UNIT_SIZE);
-        }
-    }
-
-    public void setNextBlock(Block block) {
-        nextBlock = block;
-        repaint();
-    }
-
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == pauseButton) {
+        if (e.getSource() == pauseButton && gameLogic.isRunning()) {
             if (gameLogic.isPaused()) {
                 gameLogic.pauseGame(false);
             } else {
