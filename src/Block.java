@@ -191,8 +191,6 @@ public class Block {
     private void rotateRightL(int newState, ArrayList<Unit> unitsToRotate) {
         int x0 = units.get(0).getX();
         int y0 = units.get(0).getY();
-        int x1 = units.get(1).getX();
-        int y1 = units.get(1).getY();
         int x2 = units.get(2).getX();
         int y2 = units.get(2).getY();
         int x3 = units.get(3).getX();
@@ -201,9 +199,6 @@ public class Block {
         if (newState == 0) {
             unitsToRotate.get(0).setX(x0 - unitSize);
             unitsToRotate.get(0).setY(y0 - unitSize);
-
-            //unitsToRotate.get(1).setX(x1);
-            //unitsToRotate.get(1).setY(y1);
 
             unitsToRotate.get(2).setX(x2 + unitSize);
             unitsToRotate.get(2).setY(y2 + unitSize);
@@ -215,9 +210,6 @@ public class Block {
             unitsToRotate.get(0).setX(x0 + unitSize);
             unitsToRotate.get(0).setY(y0 - unitSize);
 
-            //unitsToRotate.get(1).setX(x1);
-            //unitsToRotate.get(1).setY(y1);
-
             unitsToRotate.get(2).setX(x2 - unitSize);
             unitsToRotate.get(2).setY(y2 + unitSize);
 
@@ -228,9 +220,6 @@ public class Block {
             unitsToRotate.get(0).setX(x0 + unitSize);
             unitsToRotate.get(0).setY(y0 + unitSize);
 
-            //unitsToRotate.get(1).setX(x1);
-            //unitsToRotate.get(1).setY(y1);
-
             unitsToRotate.get(2).setX(x2 - unitSize);
             unitsToRotate.get(2).setY(y2 - unitSize);
 
@@ -240,9 +229,6 @@ public class Block {
         } else if (newState == 3) {
             unitsToRotate.get(0).setX(x0 - unitSize);
             unitsToRotate.get(0).setY(y0 + unitSize);
-
-            //unitsToRotate.get(1).setX(x1);
-            //unitsToRotate.get(1).setY(y1);
 
             unitsToRotate.get(2).setX(x2 + unitSize);
             unitsToRotate.get(2).setY(y2 - unitSize);
@@ -258,8 +244,6 @@ public class Block {
     private void rotateLeftL(int newState, ArrayList<Unit> unitsToRotate) {
         int x0 = units.get(0).getX();
         int y0 = units.get(0).getY();
-        int x1 = units.get(1).getX();
-        int y1 = units.get(1).getY();
         int x2 = units.get(2).getX();
         int y2 = units.get(2).getY();
         int x3 = units.get(3).getX();
@@ -268,9 +252,6 @@ public class Block {
         if (newState == 0) {
             unitsToRotate.get(0).setX(x0 - unitSize);
             unitsToRotate.get(0).setY(y0 - unitSize);
-
-            //unitsToRotate.get(1).setX(x1);
-            //unitsToRotate.get(1).setY(y1);
 
             unitsToRotate.get(2).setX(x2 + unitSize);
             unitsToRotate.get(2).setY(y2 + unitSize);
@@ -282,9 +263,6 @@ public class Block {
             unitsToRotate.get(0).setX(x0 + unitSize);
             unitsToRotate.get(0).setY(y0 - unitSize);
 
-            //unitsToRotate.get(1).setX(x1);
-            //unitsToRotate.get(1).setY(y1);
-
             unitsToRotate.get(2).setX(x2 - unitSize);
             unitsToRotate.get(2).setY(y2 + unitSize);
 
@@ -295,9 +273,6 @@ public class Block {
             unitsToRotate.get(0).setX(x0 + unitSize);
             unitsToRotate.get(0).setY(y0 + unitSize);
 
-            //unitsToRotate.get(1).setX(x1);
-            //unitsToRotate.get(1).setY(y1);
-
             unitsToRotate.get(2).setX(x2 - unitSize);
             unitsToRotate.get(2).setY(y2 - unitSize);
 
@@ -307,9 +282,6 @@ public class Block {
         } else if (newState == 3) {
             unitsToRotate.get(0).setX(x0 - unitSize);
             unitsToRotate.get(0).setY(y0 + unitSize);
-
-            //unitsToRotate.get(1).setX(x1);
-            //unitsToRotate.get(1).setY(y1);
 
             unitsToRotate.get(2).setX(x2 + unitSize);
             unitsToRotate.get(2).setY(y2 - unitSize);
@@ -327,8 +299,6 @@ public class Block {
         int y0 = units.get(0).getY();
         int x1 = units.get(1).getX();
         int y1 = units.get(1).getY();
-        int x2 = units.get(2).getX();
-        int y2 = units.get(2).getY();
         int x3 = units.get(3).getX();
         int y3 = units.get(3).getY();
 
@@ -338,9 +308,6 @@ public class Block {
 
             unitsToRotate.get(1).setX(x1 - unitSize);
             unitsToRotate.get(1).setY(y1 - unitSize);
-
-            //unitsToRotate.get(2).setX(x2);
-            //unitsToRotate.get(2).setY(y2);
 
             unitsToRotate.get(3).setX(x3 + unitSize);
             unitsToRotate.get(3).setY(y3 + unitSize);
@@ -352,9 +319,6 @@ public class Block {
             unitsToRotate.get(1).setX(x1 + unitSize);
             unitsToRotate.get(1).setY(y1 - unitSize);
 
-            //unitsToRotate.get(2).setX(x2);
-            //unitsToRotate.get(2).setY(y2);
-
             unitsToRotate.get(3).setX(x3 - unitSize);
             unitsToRotate.get(3).setY(y3 + unitSize);
 
@@ -365,9 +329,6 @@ public class Block {
             unitsToRotate.get(1).setX(x1 + unitSize);
             unitsToRotate.get(1).setY(y1 + unitSize);
 
-            //unitsToRotate.get(2).setX(x2);
-            //unitsToRotate.get(2).setY(y2);
-
             unitsToRotate.get(3).setX(x3 - unitSize);
             unitsToRotate.get(3).setY(y3 - unitSize);
 
@@ -377,9 +338,6 @@ public class Block {
 
             unitsToRotate.get(1).setX(x1 - unitSize);
             unitsToRotate.get(1).setY(y1 + unitSize);
-
-            //unitsToRotate.get(2).setX(x2);
-            //unitsToRotate.get(2).setY(y2);
 
             unitsToRotate.get(3).setX(x3 + unitSize);
             unitsToRotate.get(3).setY(y3 - unitSize);
@@ -392,37 +350,26 @@ public class Block {
     private void rotateRightChair(int newState, ArrayList<Unit> unitsToRotate) {
         //Rotate around 2nd unit (1)
 
-        int x0 = units.get(0).getX();
         int y0 = units.get(0).getY();
         int x1 = units.get(1).getX();
         int y1 = units.get(1).getY();
-        int x2 = units.get(2).getX();
-        int y2 = units.get(2).getY();
         int x3 = units.get(3).getX();
         int y3 = units.get(3).getY();
 
         if (newState == 0 || newState == 2) {
-            //unitsToRotate.get(0).setX(x0);
             unitsToRotate.get(0).setY(y0 - 2 * unitSize);
 
             unitsToRotate.get(1).setX(x1 - unitSize);
             unitsToRotate.get(1).setY(y1 - unitSize);
 
-            //unitsToRotate.get(2).setX(x2);
-            //unitsToRotate.get(2).setY(y2);
-
             unitsToRotate.get(3).setX(x3 - unitSize);
             unitsToRotate.get(3).setY(y3 + unitSize);
 
         } else if (newState == 1 || newState == 3) {
-            //unitsToRotate.get(0).setX(x0);
             unitsToRotate.get(0).setY(y0 + 2 * unitSize);
 
             unitsToRotate.get(1).setX(x1 + unitSize);
             unitsToRotate.get(1).setY(y1 + unitSize);
-
-            //unitsToRotate.get(2).setX(x2);
-            //unitsToRotate.get(2).setY(y2);
 
             unitsToRotate.get(3).setX(x3 + unitSize);
             unitsToRotate.get(3).setY(y3 - unitSize);
@@ -439,10 +386,7 @@ public class Block {
         int y0 = units.get(0).getY();
         int x1 = units.get(1).getX();
         int y1 = units.get(1).getY();
-        int x2 = units.get(2).getX();
-        int y2 = units.get(2).getY();
         int x3 = units.get(3).getX();
-        int y3 = units.get(3).getY();
 
         if (newState == 0 || newState == 2) {
             unitsToRotate.get(0).setX(x0 + unitSize);
@@ -451,11 +395,7 @@ public class Block {
             unitsToRotate.get(1).setX(x1 - unitSize);
             unitsToRotate.get(1).setY(y1 - unitSize);
 
-            //unitsToRotate.get(2).setX(x2);
-            //unitsToRotate.get(2).setY(y2);
-
             unitsToRotate.get(3).setX(x3 - (unitSize * 2));
-            //unitsToRotate.get(3).setY(y3);
 
         } else if (newState == 1 || newState == 3) {
             unitsToRotate.get(0).setX(x0 - unitSize);
@@ -464,11 +404,7 @@ public class Block {
             unitsToRotate.get(1).setX(x1 + unitSize);
             unitsToRotate.get(1).setY(y1 + unitSize);
 
-            //unitsToRotate.get(2).setX(x2);
-            //unitsToRotate.get(2).setY(y2);
-
             unitsToRotate.get(3).setX(x3 + (unitSize * 2));
-            //unitsToRotate.get(3).setY(y3);
         }
 
         moveStepsAwayFromLeftWall(unitsToRotate);
@@ -509,7 +445,7 @@ public class Block {
         ArrayList<Unit> predictedUnits = new ArrayList<>();
 
         for (Unit unit : units) {
-            predictedUnits.add(unit.clone());
+            predictedUnits.add(unit.cloneUnit());
         }
 
         return predictedUnits;
@@ -581,10 +517,6 @@ public class Block {
     }
 
     // ... GETTERS ........................................................
-
-    public int getX() {
-        return x;
-    }
 
     public int getY() {
         return y;

@@ -24,7 +24,7 @@ public class Unit {
         this.y = y;
     }
 
-    public Unit clone() {
+    public Unit cloneUnit() {
         return new Unit(x, y);
     }
 }

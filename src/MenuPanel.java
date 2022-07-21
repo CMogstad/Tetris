@@ -105,11 +105,7 @@ public class MenuPanel extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == pauseButton && gameLogic.isRunning()) {
-            if (gameLogic.isPaused()) {
-                gameLogic.pauseGame(false);
-            } else {
-                gameLogic.pauseGame(true);
-            }
+            gameLogic.pauseGame(!gameLogic.isPaused());
             setPauseButtonText();
         }
     }

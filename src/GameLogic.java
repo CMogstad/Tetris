@@ -12,7 +12,7 @@ public class GameLogic {
 
     private Block movingBlock;
     private Block nextBlock;
-    private ArrayList<Block> fixedBlocks = new ArrayList<>();
+    private final ArrayList<Block> fixedBlocks = new ArrayList<>();
 
     float timeUntilFallingMovement = 0.0f;
     float timeUntilInputMovement = 0.0f;

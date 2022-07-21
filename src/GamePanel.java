@@ -9,18 +9,17 @@ public class GamePanel extends JPanel implements ActionListener {
     final private int HEIGHT = 500;
     final private int UNIT_SIZE = 20;
 
-    private MyKeyListener myKeyListener = new MyKeyListener();
-    private MenuPanel menuPanel;
-    private GameLogic gameLogic;
-    private Timer timerGame;
-    private int delay = 0;
+    private final MyKeyListener myKeyListener = new MyKeyListener();
+    private final MenuPanel menuPanel;
+    private final GameLogic gameLogic;
     long prevWhen = 0;
 
     public GamePanel(MenuPanel menuPanel, GameLogic gameLogic) {
         this.gameLogic = gameLogic;
         this.menuPanel = menuPanel;
         setupPanel();
-        timerGame = new Timer(delay, this);
+        int delay = 0;
+        Timer timerGame = new Timer(delay, this);
         timerGame.start();
         setDimensionsGameLogic();
         gameLogic.startGame();
