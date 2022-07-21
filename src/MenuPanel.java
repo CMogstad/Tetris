@@ -26,11 +26,12 @@ public class MenuPanel extends JPanel implements ActionListener {
         createScoreLabel();
         createNextBlockLabel();
         createPauseButton();
+        this.setLayout(springLayout);
         this.add(scoreLabel);
         this.add(scoreAmount);
         this.add(nextBlockLabel);
         this.add(pauseButton);
-        this.setLayout(springLayout);
+        this.setVisible(true);
     }
 
     private void createPauseButton() {
@@ -99,10 +100,6 @@ public class MenuPanel extends JPanel implements ActionListener {
     public void setNextBlock(Block block) {
         nextBlock = block;
         repaint();
-    }
-
-    public int getScore() {
-        return score;
     }
 
     @Override

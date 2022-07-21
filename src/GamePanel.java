@@ -15,17 +15,24 @@ public class GamePanel extends JPanel implements ActionListener {
     private Timer timerGame;
     private int delay = 0;
 
-    private Block movingBlock;
+    /*private Block movingBlock;
     private Block nextBlock;
-    private  ArrayList<Block> fixedBlocks = new ArrayList<>();
+    private  ArrayList<Block> fixedBlocks = new ArrayList<>();*/
 
     public GamePanel(MenuPanel menuPanel, GameLogic gameLogic) {
         this.gameLogic = gameLogic;
         this.menuPanel = menuPanel;
         setupPanel();
         timerGame = new Timer(delay, this);
+        timerGame.start();
+        setDimensionsGameLogic();
+        gameLogic.startGame();
+    }
 
-        startGame();
+    private void setDimensionsGameLogic() {
+        gameLogic.setPanelHeight(HEIGHT);
+        gameLogic.setPanelWidth(WIDTH);
+        gameLogic.setUnitSize(UNIT_SIZE);
     }
 
     private void setupPanel() {
@@ -35,10 +42,10 @@ public class GamePanel extends JPanel implements ActionListener {
         this.addKeyListener(myKeyListener);
     }
 
-    // --- GAME (LIFE) CYCLE --------------------------------------------------
-
+    // --- GAME (LIFE) CYCLE -------------------------------------------------- HERE
+/*
     public void startGame() {
-        initiateBlocks();
+        gameLogic.initiateBlocks();
         gameLogic.runGame(true);
         timerGame.start();
     }
@@ -49,9 +56,9 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     public void restartGame() {
-        fixedBlocks.clear();
+        gameLogic.getFixedBlocks().clear();
         startGame();
-    }
+    }*/
 
     // --- DRAW -------------------------------------------------------------------------
 
@@ -86,6 +93,7 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     private void drawExistingBlocks(Graphics graphics) {
+        ArrayList<Block> fixedBlocks = gameLogic.getFixedBlocks();
         for (Block block : fixedBlocks) {
             graphics.setColor(block.getShape().getColor());
             for (Unit unit : block.getUnits()) {
@@ -95,6 +103,7 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     private void drawMovingBlock(Graphics graphics) {
+        Block movingBlock = gameLogic.getMovingBlock();
         graphics.setColor(movingBlock.getShape().getColor());
 
         for (Unit unit : movingBlock.getUnits()) {
@@ -104,7 +113,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
     // --- VERIFICATIONS ---------------------------------------------------------------
 
-    private void verifyFullRows(){
+    /*private void verifyFullRows(){
         ArrayList<Integer> fullRows = getYCoordinatesForFullRows();
         if (fullRows.size() > 0) {
             manageFullRow(fullRows);
@@ -229,11 +238,11 @@ public class GamePanel extends JPanel implements ActionListener {
             }
         }
         return true;
-    }
+    }*/
 
     // --- MANAGE BLOCKS -------------------------------------------------------------
 
-    private void removeBlocksWithNoUnits() {
+   /* private void removeBlocksWithNoUnits() {
         for (int i = fixedBlocks.size() - 1; i >= 0; i--) {
             Block block = fixedBlocks.get(i);
             if (block.getUnits().isEmpty()) {
@@ -334,17 +343,17 @@ public class GamePanel extends JPanel implements ActionListener {
     private void increaseScore(int rows) {
         gameLogic.increaseScore(rows);
         menuPanel.displayScore();
-    }
+    }*/
 
     // --- TICKS -----------------------------------------------------------------------
 
     long prevWhen = 0;
-    float timeUntilFallingMovement = 0.0f;
+   /* float timeUntilFallingMovement = 0.0f;
     float timeUntilInputMovement = 0.0f;
-    float timeUntilNextRotate = 0.0f;
-    float inputDelay = 0.1f;
+    float timeUntilNextRotate = 0.0f;*/
+   /* float inputDelay = 0.1f;
     float fallingDelay = 1f;
-    float rotationDelay = 0.3f;
+    float rotationDelay = 0.3f;*/
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -356,48 +365,48 @@ public class GamePanel extends JPanel implements ActionListener {
         prevWhen = when; //Save the current when
 
         if (gameLogic.isRunning() && !gameLogic.isPaused()) {
-            timeUntilFallingMovement = timeUntilFallingMovement - deltaTime;
-            timeUntilInputMovement = timeUntilInputMovement - deltaTime;
-            timeUntilNextRotate = timeUntilNextRotate - deltaTime;
+            //timeUntilFallingMovement = timeUntilFallingMovement - deltaTime;
+            //timeUntilInputMovement = timeUntilInputMovement - deltaTime;
+            //timeUntilNextRotate = timeUntilNextRotate - deltaTime;
 
-            tickInput();
-
-            if (timeUntilFallingMovement <= 0) {
-                tickFallingBlock();
+            gameLogic.tickInput(deltaTime, myKeyListener);
+            gameLogic.tickFallingBlock(deltaTime);
+          /*  if (timeUntilFallingMovement <= 0) {
+                gameLogic.tickFallingBlock();
                 timeUntilFallingMovement = fallingDelay;
-            }
+            }*/
         }
         repaint();
     }
 
-    public void tickFallingBlock() {
-        if (hasMovingBlockLandedOnBlocks() || hasMovingBlockReachedBottom()) {
-            landBlock();
+   /* public void tickFallingBlock() {
+        if (gameLogic.hasMovingBlockLandedOnBlocks() || gameLogic.hasMovingBlockReachedBottom()) {
+            gameLogic.landBlock();
         } else {
-            movingBlock.moveOneStepY();
+            gameLogic.getMovingBlock().moveOneStepY();
         }
     }
 
     public void tickInput() {
         if (myKeyListener.leftPressed && timeUntilInputMovement <= 0) {
-            moveBlockLeft();
+            gameLogic.moveBlockLeft();
             timeUntilInputMovement = inputDelay;
         }
 
         if (myKeyListener.rightPressed && timeUntilInputMovement <= 0) {
-            moveBlockRight();
+            gameLogic.moveBlockRight();
             timeUntilInputMovement = inputDelay;
         }
 
         if (myKeyListener.upPressed && timeUntilNextRotate <= 0) {
-            rotateBlock();
+            gameLogic.rotateBlock();
             timeUntilNextRotate = rotationDelay;
         }
 
         if (myKeyListener.downPressed) {
-            moveBlockDown();
+            gameLogic.moveBlockDown(timeUntilFallingMovement);
         }
-    }
+    }/*
 
     private class MyKeyListener implements KeyListener {
         boolean leftPressed = false;
@@ -420,7 +429,7 @@ public class GamePanel extends JPanel implements ActionListener {
                 }
             } else {
                 if (e.getKeyCode() == 32) {
-                    restartGame();
+                    gameLogic.restartGame();
                 }
             }
         }
@@ -434,5 +443,5 @@ public class GamePanel extends JPanel implements ActionListener {
                 case 40 -> downPressed = false;
             }
         }
-    }
+    }*/
 }
